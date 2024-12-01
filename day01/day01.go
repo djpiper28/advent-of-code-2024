@@ -95,8 +95,8 @@ func part2Calculation(data ParsedData) {
 
 	sum := 0
 
-	for _, num := range data.List1{
-    count, _ := countMap[num]
+	for _, num := range data.List1 {
+		count, _ := countMap[num]
 		difference := num * count
 		sum += difference
 	}
