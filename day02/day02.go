@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/log"
+	"github.com/jessevdk/go-flags"
 	"golang.org/x/exp/constraints"
 )
 
@@ -66,7 +67,7 @@ func Abs[T constraints.Integer](x T) T {
 	return x
 }
 
-func calculateLine(input ParsedData) error {
+func validateLineIsSafe(input ParsedData) error {
 	isUp := true
 
 	for i, currentNum := range input.Data {
@@ -99,9 +100,47 @@ func calculatePart1(data []ParsedData) int {
 	sum := 0
 
 	for _, line := range data {
-		err := calculateLine(line)
+		err := validateLineIsSafe(line)
 		if err == nil {
-			sum += 1 
+			sum += 1
+		}
+	}
+
+	return sum
+}
+
+func calculateLine2(line ParsedData) error {
+	err := validateLineIsSafe(line)
+	if err == nil {
+		return nil
+	}
+
+	log.Debug("Unsafe line detected, trying to brute force removing one entity")
+	for i := range line.Data {
+		newLine := make([]int, 0)
+
+		for j, num := range line.Data {
+			if j != i {
+				newLine = append(newLine, num)
+			}
+		}
+
+		err = validateLineIsSafe(ParsedData{Data: newLine})
+		if err == nil {
+			return nil
+		}
+	}
+
+	return errors.New("Cannot find a 'safe' variant")
+}
+
+func calculatePart2(data []ParsedData) int {
+	sum := 0
+
+	for _, line := range data {
+		err := calculateLine2(line)
+		if err == nil {
+			sum += 1
 		}
 	}
 
@@ -109,6 +148,21 @@ func calculatePart1(data []ParsedData) int {
 }
 
 func main() {
+	var opts struct {
+		Part2 bool `short:"p" long:"part" description:"Whether to calculate for part 2"`
+	}
+
+	_, err := flags.Parse(&opts)
+	if err != nil {
+		log.Fatal("Cannot parse cli args", "err", err)
+	}
+
+	if opts.Part2 {
+		log.Info("Part 2 of the problem")
+	} else {
+		log.Info("Part 1 of the problem")
+	}
+
 	log.Info("Reading file...")
 	bytes, err := os.ReadFile("input.txt")
 	if err != nil {
@@ -122,6 +176,11 @@ func main() {
 	}
 
 	log.Info("Processing data...")
-	output := calculatePart1(data)
-	log.Info("Processing done", "output", output)
+	if opts.Part2 {
+		output := calculatePart2(data)
+		log.Info("Processing done", "output", output)
+	} else {
+		output := calculatePart1(data)
+		log.Info("Processing done", "output", output)
+	}
 }
