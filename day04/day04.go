@@ -37,7 +37,7 @@ func parseData(data []byte) (ParsedData, error) {
 	return ret, nil
 }
 
-var PATTERN []byte = []byte{'X', 'M', 'A', 'S'}
+var PATTERN_1 []byte = []byte{'X', 'M', 'A', 'S'}
 
 func (p *ParsedData) scanLtR() uint {
 	var sum uint
@@ -45,14 +45,14 @@ func (p *ParsedData) scanLtR() uint {
 	for _, row := range p.letters {
 		matchIndex := 0
 		for _, b := range row {
-			if b == PATTERN[0] {
+			if b == PATTERN_1[0] {
 				matchIndex = 0
 			}
 
-			if b == PATTERN[matchIndex] {
+			if b == PATTERN_1[matchIndex] {
 				matchIndex++
 
-				if matchIndex >= len(PATTERN) {
+				if matchIndex >= len(PATTERN_1) {
 					matchIndex = 0
 					sum++
 				}
@@ -73,14 +73,14 @@ func (p *ParsedData) scanRtL() uint {
 		for i := len(row) - 1; i >= 0; i-- {
 			b := row[i]
 
-			if b == PATTERN[0] {
+			if b == PATTERN_1[0] {
 				matchIndex = 0
 			}
 
-			if b == PATTERN[matchIndex] {
+			if b == PATTERN_1[matchIndex] {
 				matchIndex++
 
-				if matchIndex >= len(PATTERN) {
+				if matchIndex >= len(PATTERN_1) {
 					sum++
 					matchIndex = 0
 				}
@@ -101,14 +101,14 @@ func (p *ParsedData) scanTtB() uint {
 		for col := 0; col < len(p.letters); col++ {
 			b := p.letters[col][row]
 
-			if b == PATTERN[0] {
+			if b == PATTERN_1[0] {
 				matchIndex = 0
 			}
 
-			if b == PATTERN[matchIndex] {
+			if b == PATTERN_1[matchIndex] {
 				matchIndex++
 
-				if matchIndex >= len(PATTERN) {
+				if matchIndex >= len(PATTERN_1) {
 					sum++
 					matchIndex = 0
 				}
@@ -130,13 +130,13 @@ func (p *ParsedData) scanBtoT() uint {
 		for col := len(p.letters) - 1; col >= 0; col-- {
 			b := p.letters[col][row]
 
-			if b == PATTERN[0] {
+			if b == PATTERN_1[0] {
 				matchIndex = 0
 			}
 
-			if b == PATTERN[matchIndex] {
+			if b == PATTERN_1[matchIndex] {
 				matchIndex++
-				if matchIndex >= len(PATTERN) {
+				if matchIndex >= len(PATTERN_1) {
 					sum++
 					matchIndex = 0
 				}
@@ -151,16 +151,16 @@ func (p *ParsedData) scanBtoT() uint {
 
 func (p *ParsedData) scanPointTLtBR(col, row int) bool {
 	// Check bounds for an illegal scan
-	if col+len(PATTERN)-1 >= len(p.letters) {
+	if col+len(PATTERN_1)-1 >= len(p.letters) {
 		return false
 	}
 
-	if row+len(PATTERN)-1 >= len(p.letters[0]) {
+	if row+len(PATTERN_1)-1 >= len(p.letters[0]) {
 		return false
 	}
 
-	for i := 0; i < len(PATTERN); i++ {
-		if p.letters[col][row] != PATTERN[i] {
+	for i := 0; i < len(PATTERN_1); i++ {
+		if p.letters[col][row] != PATTERN_1[i] {
 			return false
 		}
 
@@ -187,16 +187,16 @@ func (p *ParsedData) scanTLtBR() uint {
 
 func (p *ParsedData) scanPointBRtTL(col, row int) bool {
 	// Check bounds for an illegal scan
-	if col-len(PATTERN)+1 < 0 {
+	if col-len(PATTERN_1)+1 < 0 {
 		return false
 	}
 
-	if row-len(PATTERN)+1 < 0 {
+	if row-len(PATTERN_1)+1 < 0 {
 		return false
 	}
 
-	for i := 0; i < len(PATTERN); i++ {
-		if p.letters[col][row] != PATTERN[i] {
+	for i := 0; i < len(PATTERN_1); i++ {
+		if p.letters[col][row] != PATTERN_1[i] {
 			return false
 		}
 
@@ -223,16 +223,16 @@ func (p *ParsedData) scanBRtTL() uint {
 
 func (p *ParsedData) scanPointTRtBL(col, row int) bool {
 	// Check bounds for an illegal scan
-	if col+len(PATTERN)-1 >= len(p.letters) {
+	if col+len(PATTERN_1)-1 >= len(p.letters) {
 		return false
 	}
 
-	if row-len(PATTERN)+1 < 0 {
+	if row-len(PATTERN_1)+1 < 0 {
 		return false
 	}
 
-	for i := 0; i < len(PATTERN); i++ {
-		if p.letters[col][row] != PATTERN[i] {
+	for i := 0; i < len(PATTERN_1); i++ {
+		if p.letters[col][row] != PATTERN_1[i] {
 			return false
 		}
 
@@ -259,16 +259,16 @@ func (p *ParsedData) scanTRtBL() uint {
 
 func (p *ParsedData) scanPointBLtTR(col, row int) bool {
 	// Check bounds for an illegal scan
-	if col-len(PATTERN)+1 < 0 {
+	if col-len(PATTERN_1)+1 < 0 {
 		return false
 	}
 
-	if row+len(PATTERN)-1 >= len(p.letters[0]) {
+	if row+len(PATTERN_1)-1 >= len(p.letters[0]) {
 		return false
 	}
 
-	for i := 0; i < len(PATTERN); i++ {
-		if p.letters[col][row] != PATTERN[i] {
+	for i := 0; i < len(PATTERN_1); i++ {
+		if p.letters[col][row] != PATTERN_1[i] {
 			return false
 		}
 
@@ -327,6 +327,44 @@ func part1Calculation(data ParsedData) {
 	log.Info("Complete", "output", sum)
 }
 
+var PATTERN_2 []byte = []byte{'M', 'A', 'S'}
+
+func matchesPattern2StartEnd(start, end byte) bool {
+	// There is no bool XOR in go, however != does the same thing, see below
+	/*
+	| a | b | a != b | a ^^ b |
+	|---|---|--------|--------|
+	| 0 | 0 |   0    |   0    |
+	| 1 | 0 |   1    |   1    |
+	| 0 | 1 |   1    |   1    |
+	| 1 | 1 |   0    |   0    |
+	*/
+	return ((start == PATTERN_2[0]) != (end == PATTERN_2[0])) &&
+		((start == PATTERN_2[2]) != (end == PATTERN_2[2]))
+}
+
+func part2Calculation(data ParsedData) {
+	sum := 0
+
+	for col := 1; col < len(data.letters)-1; col++ {
+		for row := 1; row < len(data.letters[0])-1; row++ {
+			if data.letters[col][row] == PATTERN_2[1] {
+				a0 := data.letters[col-1][row-1]
+				a1 := data.letters[col+1][row+1]
+
+				b0 := data.letters[col-1][row+1]
+				b1 := data.letters[col+1][row-1]
+
+				if matchesPattern2StartEnd(a0, a1) && matchesPattern2StartEnd(b0, b1) {
+					sum += 1
+				}
+			}
+		}
+	}
+
+	log.Info("Complete", "output", sum)
+}
+
 func main() {
 	var opts struct {
 		Part2 bool `short:"p" long:"part" description:"Whether to calculate for part 2"`
@@ -359,7 +397,7 @@ func main() {
 
 	log.Info("Calculating output")
 	if opts.Part2 {
-		// part2Calculation(data)
+		part2Calculation(data)
 	} else {
 		part1Calculation(data)
 	}
