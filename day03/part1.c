@@ -68,4 +68,5 @@ int main(int argc, char **argv)
     }
 
     printf("Complete! output=%lu\n", sum);
+    fclose(f);
 }
