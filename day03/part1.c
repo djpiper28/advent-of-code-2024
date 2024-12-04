@@ -56,7 +56,7 @@ int main(int argc, char **argv)
             if (c == MUL_CLOSE) {
                 sum += (a * b);
                 mul_open_index = 0;
-                printf("Read a=\t%d, b=\t%d, new sum is \t%lu\n", a, b, sum);
+                // printf("Read a=\t%d, b=\t%d, new sum is \t%lu\n", a, b, sum);
             } else if (c >= '0' && c <= '9') {
                 b *= 10;
                 b += c - '0';

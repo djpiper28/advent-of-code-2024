@@ -38,7 +38,7 @@ int main(int argc, char **argv)
             do_mul_index++;
 
             if (do_mul_index >= sizeof(DO_MUL) - 1) {
-                printf("Do mul\n");
+                // printf("Do mul\n");
                 do_mul = 1;
                 do_mul_index = 0;
             }
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
             dont_mul_index++;
 
             if (dont_mul_index >= sizeof(DONT_MUL) - 1) {
-                printf("Don't mul\n");
+                // printf("Don't mul\n");
                 do_mul = 0;
                 dont_mul_index = 0;
             }
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
             if (c == MUL_CLOSE) {
                 sum += (a * b);
                 mul_open_index = 0;
-                printf("Read a=\t%d, b=\t%d, new sum is \t%lu\n", a, b, sum);
+                // printf("Read a=\t%d, b=\t%d, new sum is \t%lu\n", a, b, sum);
             } else if (c >= '0' && c <= '9') {
                 b *= 10;
                 b += c - '0';
