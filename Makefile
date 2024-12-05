@@ -1,38 +1,36 @@
-execs=day01-exec day02-exec day03-exec day04-exec day05-exec
-all: $(execs)
-.PHONY: $(execs)
+SOURCES=$(wildcard */go.mod)
+TARGETS-BIN=$(patsubst %/go.mod,%-bin,$(SOURCES))
+TARGETS=$(patsubst %/go.mod,%-exec,$(SOURCES))
+TARGETS_EXEC_1=$(patsubst %/go.mod,%-exec-1,$(SOURCES))
+TARGETS_EXEC_2=$(patsubst %/go.mod,%-exec-2,$(SOURCES))
+.PHONY: $(TARGETS)
+all: $(TARGETS) day03-exec
 
-day01/day01: $(wildcard day01/*.go day01/*.txt)
-	cd day01 && go build 
-
-day01-exec: day01 day01/day01
-	cd day01 && time ./day01 -p false
-	cd day01 && time ./day01 -p true
-
-day02/day02: $(wildcard day02/*.go day02/*.txt)
-	cd day02 && go build 
-
-day02-exec: day02 day02/day02
-	cd day02 && time ./day02 -p false
-	cd day02 && time ./day02 -p true
-
+# C code
 day03/part1 day03/part2: $(wildcard day03/*.c day03/*.txt)
 	cd day03 && make -j
 
-day03-exec: day03/part1 day03/part2
+.PHONY: day03-exec-1
+day03-exec-1: day03/part2
 	cd day03 && time ./part1
+
+.PHONY: day03-exec-2
+day03-exec-2: day03/part2
 	cd day03 && time ./part2
 
-day04/day04: $(wildcard day04/*.go day04/*.txt)
-	cd day04 && go build 
+day03-exec: day03-exec-1 day03-exec-2
 
-day04-exec: day04 day04/day04
-	cd day04 && time ./day04 -p false
-	cd day04 && time ./day04 -p true
+# Go code
+$(TARGETS-BIN): %-bin: % %/go.mod
+	cd $< && go build
 
-day05/day05: $(wildcard day05/*.go day05/*.txt)
-	cd day05 && go build 
+.PHONY: %-exec-1
+$(TARGETS_EXEC_1): %-exec-1: % %-bin
+	cd $</ && time ./$< -p false 
 
-day05-exec: day05 day05/day05
-	cd day05 && time ./day05 -p false
-	cd day05 && time ./day05 -p true
+.PHONY: %-exec-2
+$(TARGETS_EXEC_2): %-exec-2: % %-bin
+	cd $</ && time ./$< -p true
+
+.PHONY: %-exec
+$(TARGETS): %-exec: %-exec-1 %-exec-2
