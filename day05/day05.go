@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/charmbracelet/log"
 	"github.com/jessevdk/go-flags"
@@ -239,6 +240,49 @@ func part1Calculation(data ParsedData) {
 	log.Info("Complete!", "output", total, "validvalidSequences", validSequences)
 }
 
+func contains(arr []int, num int) bool {
+	for _, v := range arr {
+		if v == num {
+			return true
+		}
+	}
+
+	return false
+}
+
+func part2Calculation(data ParsedData) {
+	total := 0
+	validSequences := 0
+
+	for _, sequence := range data.Sequences {
+		if testSequence(&sequence, &data) {
+			continue
+		}
+
+		slices.SortFunc(sequence.Data, func(a, b int) int {
+			// a < b is true when b has a rule that contains a
+			rule, hasRule := data.NumberDependancies[b]
+			if hasRule {
+				if contains(rule, a) {
+					return -1
+				}
+			}
+
+			// Only reorder when a rule is matched
+			return 0
+		})
+
+		if testSequence(&sequence, &data) {
+			total += sequence.Data[len(sequence.Data)/2]
+			validSequences++
+		} else {
+			log.Fatal("The sequence should be valid after sorting", "sequence", sequence)
+		}
+	}
+
+	log.Info("Complete!", "output", total, "validvalidSequences", validSequences)
+}
+
 func main() {
 	var opts struct {
 		Part2 bool `short:"p" long:"part" description:"Whether to calculate for part 2"`
@@ -269,7 +313,7 @@ func main() {
 
 	log.Info("Calculating...")
 	if opts.Part2 {
-		// part2Calculation(data)
+		part2Calculation(data)
 	} else {
 		part1Calculation(data)
 	}
