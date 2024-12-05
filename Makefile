@@ -1,4 +1,6 @@
-all: day01-exec day02-exec day03-exec day04-exec
+execs=day01-exec day02-exec day03-exec day04-exec day05-exec
+all: $(execs)
+.PHONY: $(execs)
 
 day01/day01: $(wildcard day01/*.go day01/*.txt)
 	cd day01 && go build 
