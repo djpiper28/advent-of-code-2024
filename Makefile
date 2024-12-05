@@ -27,3 +27,10 @@ day04/day04: $(wildcard day04/*.go day04/*.txt)
 day04-exec: day04 day04/day04
 	cd day04 && time ./day04 -p false
 	cd day04 && time ./day04 -p true
+
+day05/day05: $(wildcard day05/*.go day05/*.txt)
+	cd day05 && go build 
+
+day05-exec: day05 day05/day05
+	cd day05 && time ./day05 -p false
+	cd day05 && time ./day05 -p true
