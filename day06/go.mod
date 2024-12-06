@@ -1,13 +1,16 @@
 module github.com/djpiper28/advent-of-code-2024/day06
 
-go 1.22.6
+go 1.23.3
+
+require (
+	github.com/charmbracelet/log v0.4.0
+	github.com/jessevdk/go-flags v1.6.1
+)
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/lipgloss v0.10.0 // indirect
-	github.com/charmbracelet/log v0.4.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/jessevdk/go-flags v1.6.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect

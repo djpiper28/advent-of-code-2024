@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/charmbracelet/log"
 	"github.com/jessevdk/go-flags"
@@ -34,6 +35,19 @@ type ParsedData struct {
 	Grid      [][]MapTile
 	Location  Vec2
 	Direction Direction
+}
+
+func (p *ParsedData) clone() *ParsedData {
+	ret := &ParsedData{Location: p.Location, Direction: p.Direction, Grid: make([][]MapTile, 0)}
+
+	for _, line := range p.Grid {
+		lineCopy := make([]MapTile, len(line))
+		copy(lineCopy, line)
+
+		ret.Grid = append(ret.Grid, lineCopy)
+	}
+
+	return ret
 }
 
 func parseData(data []byte) (ParsedData, error) {
@@ -147,7 +161,8 @@ func (p *ParsedData) moveGuard() bool {
 			p.rotate()
 
 			if i == 3 {
-				log.Warn("The damned guard is spinning")
+				log.Warn("The guard is spinning (what a loser)")
+				return false
 			}
 		} else {
 			break
@@ -162,42 +177,84 @@ type StateSeen struct {
 	Direction Direction
 }
 
-func part1Calculation(data ParsedData) {
+func (p *ParsedData) guardPositions() (int, error) {
 	states := make(map[StateSeen]bool)
 	positions := make(map[Vec2]bool)
 
-	for i := 0; true; i++ {
-		state := StateSeen{Location: data.Location, Direction: data.Direction}
+  for {
+		state := StateSeen{Location: p.Location, Direction: p.Direction}
 
 		_, found := states[state]
 		if found {
-			log.Fatal("The guard is in a loop - he will never leave the lab. The output will not be valid.",
-				"location", data.Location,
-				"direction", data.Direction,
+			log.Warn("The guard is in a loop - he will never leave the lab.",
+				"location", p.Location,
+				"direction", p.Direction,
 				"positions", len(positions),
 				"states", len(states))
-			break
+			return 0, errors.New("The guard is lost")
 		}
 
 		states[state] = true
-		positions[data.Location] = true
+		positions[p.Location] = true
 
-		exited := data.moveGuard()
+		exited := p.moveGuard()
 		if exited {
-			log.Info("The guard has left the map")
+			log.Debug("The guard has left the map")
 			break
-		}
-
-		if i != 0 && i%1000 == 0 {
-			log.Warn("Still working", "iteration", i)
 		}
 	}
 
-	log.Info("Complete", "output", len(positions))
+	return len(positions), nil
+}
+
+func part1Calculation(data ParsedData) {
+	count, err := data.guardPositions()
+	if err != nil {
+		log.Fatal("Guard is unable to escape", "err", err)
+	}
+
+	log.Info("Complete", "output", count)
+	return
 }
 
 func part2Calculation(data ParsedData) {
+	positions := make(map[Vec2]bool)
 
+  p := data.clone()
+  for {
+		positions[p.Location] = true
+
+		exited := p.moveGuard()
+		if exited {
+			break
+		}
+	}
+
+  var wg sync.WaitGroup
+  var lock sync.Mutex
+  total := 0
+
+  log.Info("Inserting obstacles", "obstacles", len(positions))
+
+  for position := range positions {
+    wg.Add(1)
+    go func() {
+      defer wg.Done()
+
+      newGrid := data.clone()
+      newGrid.Grid[position.Y][position.X] = MapTileWall
+
+      _, err := newGrid.guardPositions()
+      if err != nil {
+        lock.Lock()
+        defer lock.Unlock()
+        total++
+      }
+    }()
+  }
+
+  wg.Wait()
+  log.Info("Completed brute force", "output", total)
 }
 
 func main() {
